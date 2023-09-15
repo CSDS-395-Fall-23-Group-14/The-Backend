@@ -32,10 +32,11 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
         for (i=0;i<realRows.length;i++) {
             const tds = Array.from(realRows[i].querySelectorAll("td"));
             const lastly = tds.map((td) => td.innerText);
-
+            var name = lastly[0].split("\n");
             stocks.push(
                 {
-                    company: lastly[0],
+                    ticker: name[0],
+                    company: name[1],
                     currentprice: lastly[1],
                     PERatio: lastly[2],
                     MarketCap: lastly[3],
@@ -53,4 +54,4 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
     //console.log(data.length);
    // console.log(data.length);
     browser.close();
-})();
+})(); 
