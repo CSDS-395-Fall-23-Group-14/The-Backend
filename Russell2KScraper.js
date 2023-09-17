@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 
 /*
+    Use npm to install package dependencies 
     Command to run: node Russell2KScraper.js
 
     This just prints the results and # of results right now
