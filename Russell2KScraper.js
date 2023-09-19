@@ -2,22 +2,24 @@ const puppeteer = require('puppeteer');
 
 /*
     Use npm to install package dependencies 
+    Uncomment printRussell2K function call
     Command to run: node Russell2KScraper.js
 
     This just prints the results and # of results right now
 */
 
+module.exports = { russel2KScraper };
 
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 
-(async function russel2KScraper() {
+async function russel2KScraper() {
     const browser = await puppeteer.launch( {headless:false} );
     const page =  await browser.newPage();
     await page.goto('https://www.marketbeat.com/types-of-stock/russell-2000-stocks/');
     await page.select('#cphPrimaryContent_ddlResultCount', '-1');
     
-    await delay(40000);
+    await delay(30000);
   
     const data = await page.evaluate(async function () {
         
@@ -47,12 +49,17 @@ const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, mil
             )
         } 
         return stocks;
-
-       // return el;
     })
-    console.log(data);
-    console.log(data.length);
-    //console.log(data.length);
-   // console.log(data.length);
     browser.close();
-})(); 
+
+    return data;
+};
+
+
+async function printRussell2K() {
+    const russell = await russel2KScraper();
+    console.log(russell);
+    console.log(`Number of records: ${russell.length}`);
+}
+
+//printRussell2K();

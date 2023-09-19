@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const r2k = require('./Russell2KScraper');
 
 
 /**
@@ -71,8 +72,47 @@ async function optionsScraper() {
     console.log(stonks[0]);
     }
     browser.close();
-    //console.log(stonks[]);
-    console.log(`Number of records: ${stonks.length}`);
+    
+    return stonks;
 }
 
-optionsScraper();
+async function printSomeOptions() {
+    const options = await optionsScraper();
+    
+    let count = 0;
+    options.forEach(opt => {
+        if (count == 0) {
+            console.log(opt);
+        } else if (count == 300) {
+            count = 0;
+        }
+        count++;
+    })
+
+    console.log(`Number of records: ${stonks.length}`);
+
+}
+
+(async function filterStocks () {
+
+    const russell = await r2k.russel2KScraper();
+    //const options = await optionsScraper();
+    ///// DUMBASSS this doesn't return anything.......
+
+    console.log("LOGGING SOME WORDS");
+    //console.log(russell);
+
+  /* const res = options.filter(opt => {
+    let temp = russell.filter(russ => russ.ticker == opt.symbol);
+    return temp.length > 0;
+    } ) */
+
+    res = russell.filter(russ => russ.ticker == "CELH");
+    console.log("Getting results...")
+
+    console.log(res);
+
+})();
+
+//printSomeOptions();
+//filterStocks();
