@@ -6,6 +6,7 @@ const r2k = require('./Russell2KScraper');
  * 
  * Scrapes options data from the yahoo link and prints to terminal
  * Run npm install to get dependencies
+ * Uncomment the function you want to run from the bottom
  * Rune node OptionsScraper.js to run the script
  * 
  */
@@ -68,12 +69,76 @@ async function optionsScraper() {
     const [next] = await page.$x('//*[@id="scr-res-table"]/div[2]/button[3]');
 
     await next.click();
-    await delay(1000);
-    console.log(stonks[0]);
+    await delay(750);
     }
     browser.close();
     
     return stonks;
+}
+
+async function optionsPart2() {
+    const browser = await puppeteer.launch( {headless:false} );
+    const page = await browser.newPage();
+
+    const url = 'https://finance.yahoo.com/options/highest-open-interest/?count=100&offset=';
+    var offset = 0;
+    var flag = true;
+    let stocks = []
+
+    while (flag) {
+        await page.goto(url + offset);
+
+        const data = await page.evaluate(async function () {
+
+            const tbody = document.querySelector("tbody");
+    
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            let tempStonks = [];
+            for (i=0;i<rows.length;i++) {
+                const tds = Array.from(rows[i].querySelectorAll("td"));
+                const cols = tds.map((td) => td.innerText);
+                tempStonks.push(
+                    {
+                        linkthing: cols[0],
+                        symbol: cols[1],
+                        name: cols[2],
+                        strike: cols[3],
+                        expiration: cols[4],
+                        intradayprice: cols[5],
+                        change: cols[6],
+                        percentchange: cols[7],
+                        bid: cols[8],
+                        ask: cols[9],
+                        volume: cols[10],
+                        openinterest: cols[11] 
+                    }
+                )
+            }
+            console.log(tempStonks[0])
+            return tempStonks;
+        });
+    
+         // Check for last page
+        if (data.length != 100) {
+            flag = false;
+        }
+        offset += 100;
+        console.log(data[1]);
+        stocks = [...data, ...stocks];
+        
+        
+    
+       // const [next] = await page.$x('//*[@id="scr-res-table"]/div[2]/button[3]');
+    
+       // await next.click();
+       await delay(2304);
+    }
+
+    console.log("Closing");
+    await delay(100);
+
+    await browser.close();
+    
 }
 
 async function printSomeOptions() {
@@ -89,30 +154,28 @@ async function printSomeOptions() {
         count++;
     })
 
-    console.log(`Number of records: ${stonks.length}`);
+    console.log(`Number of records: ${options.length}`);
 
 }
 
-(async function filterStocks () {
+async function filterStocks () {
 
-    const russell = await r2k.russel2KScraper();
-    //const options = await optionsScraper();
-    ///// DUMBASSS this doesn't return anything.......
+    const russell = await r2k.betterSite();
+    const options = await optionsPart2();
 
-    console.log("LOGGING SOME WORDS");
-    //console.log(russell);
+    console.log("Thinking...");
 
-  /* const res = options.filter(opt => {
+   const res = options.filter(opt => {
     let temp = russell.filter(russ => russ.ticker == opt.symbol);
     return temp.length > 0;
-    } ) */
+    } ) 
 
-    res = russell.filter(russ => russ.ticker == "CELH");
     console.log("Getting results...")
 
     console.log(res);
 
-})();
+}
 
 //printSomeOptions();
-//filterStocks();
+filterStocks();
+//optionsPart2();
