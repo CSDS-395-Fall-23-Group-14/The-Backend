@@ -67,7 +67,7 @@ async function betterSite() {
     const browser = await puppeteer.launch( {headless:false} );
     const page = await browser.newPage();
     await page.goto('https://www.ishares.com/us/products/239710/ishares-russell-2000-etf');
-    await delay(1000);
+    await delay(5000);
 
     // Accept the cookies
     const [cookies] = await page.$x('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');
@@ -91,12 +91,16 @@ async function betterSite() {
         for (i = 0; i<rows.length;i++) {
             const tds = Array.from(rows[i].querySelectorAll("td"));
             const cols = tds.map((td) => td.innerText);
+
+            // divide market value by shares for share price
+            // 
             stocks.push(
                 {
                     ticker: cols[0],
                     companyname: cols[1],
                     sector: cols[2],
                     assetclass: cols[3],
+                    shareprice: ((+cols[4].replaceAll("$", "").replaceAll(",",""))/(+cols[7].replaceAll(',', ''))).toFixed(2),//cols[4]/cols[7], // This is giving null right now
                     marketvalue: cols[4],
                     weight: cols[5],
                     notionalvalue: cols[6],
@@ -123,4 +127,4 @@ async function printBetterStocks() {
 }
 
 //printRussell2K();
-//printBetterStocks();
+printBetterStocks();

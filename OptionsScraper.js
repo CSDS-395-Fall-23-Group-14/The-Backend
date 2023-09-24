@@ -41,6 +41,7 @@ async function optionsScraper() {
                     linkthing: cols[0],
                     symbol: cols[1],
                     name: cols[2],
+                    position: cols[2].slice(-4).replace(" ", ""),
                     strike: cols[3],
                     expiration: cols[4],
                     intradayprice: cols[5],
@@ -97,11 +98,13 @@ async function optionsPart2() {
             for (i=0;i<rows.length;i++) {
                 const tds = Array.from(rows[i].querySelectorAll("td"));
                 const cols = tds.map((td) => td.innerText);
+                //position - put or call from name
                 tempStonks.push(
                     {
                         linkthing: cols[0],
                         symbol: cols[1],
                         name: cols[2],
+                        position: cols[2].slice(-4).replace(" ", ""),
                         strike: cols[3],
                         expiration: cols[4],
                         intradayprice: cols[5],
@@ -126,11 +129,6 @@ async function optionsPart2() {
         console.log(data[1]);
         stocks = [...data, ...stocks];
         
-        
-    
-       // const [next] = await page.$x('//*[@id="scr-res-table"]/div[2]/button[3]');
-    
-       // await next.click();
        await delay(2304);
     }
 
@@ -138,6 +136,7 @@ async function optionsPart2() {
     await delay(100);
 
     await browser.close();
+    return stocks;
     
 }
 
@@ -177,5 +176,5 @@ async function filterStocks () {
 }
 
 //printSomeOptions();
-filterStocks();
-//optionsPart2();
+//filterStocks();
+optionsPart2();
