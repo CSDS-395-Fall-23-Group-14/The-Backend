@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 /*
     Use npm to install package dependencies 
@@ -30,21 +31,27 @@ async function russel2KScraper() {
         tbody.querySelectorAll("tr")
         );
      
+        const today = new Date();
+        const dateTaken = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+
         const realRows = rows.filter(element => !(element.classList.contains("bottom-sort")));
         let stocks = []
         for (i=0;i<realRows.length;i++) {
             const tds = Array.from(realRows[i].querySelectorAll("td"));
             const lastly = tds.map((td) => td.innerText);
             var name = lastly[0].split("\n");
+            var pricing = lastly[1].split("\n");
             stocks.push(
                 {
                     ticker: name[0],
                     company: name[1],
-                    currentprice: lastly[1],
+                    currentprice: pricing[0],
+                    percentChange: pricing[1],
                     PERatio: lastly[2],
                     MarketCap: lastly[3],
                     Volume: lastly[4],
-                    AvgVolume: lastly[5]
+                    AvgVolume: lastly[5],
+                    dateScraped: dateTaken
                 }
             )
         } 
@@ -87,13 +94,16 @@ async function betterSite() {
         const table = document.querySelector("#allHoldingsTable");
         const body = table.querySelector("tbody");
         const rows = Array.from(body.querySelectorAll("tr")); 
+        const today = new Date();
+        const dateTaken = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+
         const stocks = [];
         for (i = 0; i<rows.length;i++) {
             const tds = Array.from(rows[i].querySelectorAll("td"));
             const cols = tds.map((td) => td.innerText);
 
             // divide market value by shares for share price
-            // 
+            
             stocks.push(
                 {
                     ticker: cols[0],
@@ -108,7 +118,8 @@ async function betterSite() {
                     cuspid: cols[8],
                     isin: cols[9],
                     sedol: cols[10],
-                    accrualdate: cols[11]
+                    accrualdate: cols[11],
+                    dateScraped: dateTaken
                 }
             );
         }
@@ -126,5 +137,31 @@ async function printBetterStocks() {
     console.log(`Number of records: ${stocks.length}`);
 }
 
+async function writeIsharesToFile() {
+    const temp = await betterSite();
+    const content = JSON.stringify(temp);
+    fs.writeFile("./data/IsharesRussell2K.json", content, err => {
+        if (err) {
+            console.log("Error writing to file");
+        } else {
+            console.log("Successfully written to /data/IsharesRussell2K.json");
+        }
+    }) 
+}
+
+async function writeMarketBeatToFile() {
+    const temp = await russel2KScraper();
+    const content = JSON.stringify(temp);
+    fs.writeFile("./data/MarketBeatRussell2K.json", content, err => {
+        if (err) {
+            console.log("Error writing to file");
+        } else {
+            console.log("Successfully written to /data/MarketBeatRussell2K.json");
+        }
+    }) 
+}
+
 //printRussell2K();
-printBetterStocks();
+//printBetterStocks();
+//writeIsharesToFile();
+//writeMarketBeatToFile();

@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const r2k = require('./Russell2KScraper');
+const fs = require('fs');
 
 
 /**
@@ -21,13 +22,15 @@ async function optionsScraper() {
     const page = await browser.newPage();
     await page.goto('https://finance.yahoo.com/options/highest-open-interest/?count=100&offset=0');
 
-
     let flag = true;
     let stonks = [];
     while (flag) {
 
     
     const data = await page.evaluate(async function () {
+
+        const today = new Date();
+        const dateTaken = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
 
         const tbody = document.querySelector("tbody");
 
@@ -50,7 +53,8 @@ async function optionsScraper() {
                     bid: cols[8],
                     ask: cols[9],
                     volume: cols[10],
-                    openinterest: cols[11] 
+                    openinterest: cols[11],
+                    dateScraped: dateTaken
                 }
             )
         }
@@ -84,12 +88,15 @@ async function optionsPart2() {
     const url = 'https://finance.yahoo.com/options/highest-open-interest/?count=100&offset=';
     var offset = 0;
     var flag = true;
-    let stocks = []
-
+    let stocks = [];
+    
     while (flag) {
         await page.goto(url + offset);
 
         const data = await page.evaluate(async function () {
+
+            const today = new Date();
+            const dateTaken = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
 
             const tbody = document.querySelector("tbody");
     
@@ -113,7 +120,8 @@ async function optionsPart2() {
                         bid: cols[8],
                         ask: cols[9],
                         volume: cols[10],
-                        openinterest: cols[11] 
+                        openinterest: cols[11],
+                        dateScraped: dateTaken
                     }
                 )
             }
@@ -132,7 +140,7 @@ async function optionsPart2() {
        await delay(2304);
     }
 
-    console.log("Closing");
+   // console.log("Closing");
     await delay(100);
 
     await browser.close();
@@ -171,10 +179,31 @@ async function filterStocks () {
 
     console.log("Getting results...")
 
-    console.log(res);
+    //console.log(res);
+    return res;
 
+}
+
+async function writeOptionsToFile() {
+    const russell = await r2k.betterSite();
+    const options = await optionsPart2();
+
+    const res = options.filter(opt => {
+        let temp = russell.filter(russ => russ.ticker == opt.symbol);
+        return temp.length > 0;
+    } );
+    const content = JSON.stringify(res);
+
+    fs.writeFile("./data/OptionsRussell2K.json", content, err => {
+        if (err) {
+            console.log("Error writing to file");
+        } else {
+            console.log(`Successfully written ${res.length} options to /data/OptionsRussell2K.json`);
+        }
+    })
 }
 
 //printSomeOptions();
 //filterStocks();
-optionsPart2();
+//optionsPart2();
+writeOptionsToFile();
