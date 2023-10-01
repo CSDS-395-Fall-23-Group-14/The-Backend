@@ -161,7 +161,94 @@ async function writeMarketBeatToFile() {
     }) 
 }
 
-//printRussell2K();
+async function combineData() {
+    const mb = await russel2KScraper();
+    const ish = await betterSite();
+
+    let temp = [];
+
+    ish.forEach(is => {
+        let flag = false;
+        for (i=0;i<mb.length;i++) {
+            if (is.ticker == mb[i].ticker) {
+                temp.push(
+                    {
+                        ticker: is.ticker,
+                        companyname: is.companyname,
+                        sector: is.sector,
+                        assetclass: is.assetclass,
+                        currentprice: mb[i].currentprice,
+                        pricePercentChange: mb[i].percentChange,
+                        marketvalue: is.marketvalue,
+                        marketcap: mb[i].MarketCap,
+                        PEratio: mb[i].PERatio,
+                        volume: mb[i].Volume,
+                        avgvolume: mb[i].AvgVolume,
+                        weight: is.weight,
+                        notionalvalue: is.notionalvalue,
+                        shares: is.shares,
+                        calculatedPrice: is.shareprice,
+                        cuspid: is.cuspid,
+                        isin: is.isin,
+                        sedol: is.sedol,
+                        datescraped: is.dateScraped
+                        
+                    }
+                )
+                flag = true;
+            } else if (!flag && (mb.length - 1 == i)) { // Stock doesn't exist in marketbeat collection
+                temp.push(
+                    {
+                        ticker: is.ticker,
+                        companyname: is.companyname,
+                        sector: is.sector,
+                        assetclass: is.assetclass,
+                        currentprice: "-",
+                        pricePercentChange: "-",
+                        marketvalue: is.marketvalue,
+                        marketcap: "-",
+                        PEratio: "-",
+                        volume: "-",
+                        avgvolume: "-",
+                        weight: is.weight,
+                        notionalvalue: is.notionalvalue,
+                        shares: is.shares,
+                        calculatedPrice: is.shareprice,
+                        cuspid: is.cuspid,
+                        isin: is.isin,
+                        sedol: is.sedol,
+                        datescraped: is.dateScraped
+                    }
+                )
+            }
+        }
+    });
+
+    return temp;
+}
+
+async function printDataCombo() {
+    const stocks = await combineData();
+    console.log(stocks);
+    console.log(`${stocks.length} total entries`);
+}
+
+async function writeComboDataToFile() {
+    const stocks = await combineData();
+    const content = JSON.stringify(stocks);
+    fs.writeFile("./data/ComboRussell2K.json", content, err => {
+        if (err) {
+            console.log("Error writing to file");
+        } else {
+            console.log("Successfully written to /data/ComboRussell2K.json");
+        }
+    })
+
+}
+
+printRussell2K();
 //printBetterStocks();
 //writeIsharesToFile();
 //writeMarketBeatToFile();
+//printDataCombo();
+//writeComboDataToFile();
