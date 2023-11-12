@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
-const r2k = require('./Russell2KScraper');
 const fs = require('fs');
+const stocks = require('./data/ComboRussell2K.json');
+const r2k = require('./Russell2KScraper');
 
 
 /**
@@ -150,7 +151,7 @@ async function optionsPart2() {
 
 async function printSomeOptions() {
     const options = await optionsScraper();
-
+    
     let count = 0;
     options.forEach(opt => {
         if (count == 0) {
@@ -166,8 +167,8 @@ async function printSomeOptions() {
 }
 
 async function filterStocks() {
-
-    const russell = await r2k.betterSite();
+   // const russell = await r2k.betterOption();
+    const russell = stocks;
     const options = await optionsPart2();
 
     console.log("Thinking...");
@@ -185,7 +186,7 @@ async function filterStocks() {
 }
 
 async function writeOptionsToFile() {
-    const russell = await r2k.betterSite();
+    const russell = stocks;
     const options = await optionsPart2();
 
     const res = options.filter(opt => {

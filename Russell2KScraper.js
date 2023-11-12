@@ -102,19 +102,19 @@ async function printRussell2K() {
 async function betterSite() {
     const browser = await puppeteer.launch( {headless:false} );
     const page = await browser.newPage();
-    await page.goto('https://www.ishares.com/us/products/239710/ishares-russell-2000-etf');
+    await page.goto('https://www.ishares.com/us/products/239714/ishares-russell-3000-etf'); // old line('https://www.ishares.com/us/products/239710/ishares-russell-2000-etf');
     await delay(5000);
 
     // Accept the cookies
-    //const [cookies] = await page.$x('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');
+    const [cookies] = await page.$x('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');  // Old COokies('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');
     await delay(500);
     
-   // await cookies.click();
+    await cookies.click();
     
     await delay(500);
 
     // click show more
-    const [loadMore] = await page.$x('/html/body/div[1]/div[2]/div/div/div/div/div/div[13]/div/div/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[3]/a');
+    const [loadMore] = await page.$x('/html/body/div[1]/div[2]/div/div/div/div/div/div[13]/div/div/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[3]/a');    // old tag ('/html/body/div[1]/div[2]/div/div/div/div/div/div[13]/div/div/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[3]/a');
     await loadMore.click();
     await delay(1000);
 
@@ -271,5 +271,7 @@ async function writeComboDataToFile() {
 //printBetterStocks();
 //writeIsharesToFile();
 //writeMarketBeatToFile();
-//printDataCombo();
-//writeComboDataToFile();
+
+//printDataCombo(); // prints the data
+
+//writeComboDataToFile(); // Scrapes stock data and writes to file
