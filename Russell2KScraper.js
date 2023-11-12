@@ -14,6 +14,35 @@ module.exports = { russel2KScraper, betterSite };
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 
+function removeNonNumerals(val) {
+    val = val.replaceAll("$", "").replaceAll(",", "");
+    val = +val;
+    return val;
+}
+
+function convertPercents(val) {
+    val = val.replace("%", "").replace("+", "");
+    val = +val;
+    return val;
+}
+
+function convertToNumber(val) {
+    if (val.includes("billion")) {
+        val = val.replaceAll(" billion", "").replace("$", "").replace(",", "");
+        val = +val;
+        val = val*1000000000;
+    } else if (val.includes("million")) {
+        val = val.replaceAll(" million", "").replace("$", "").replace(",", "");
+        val = +val;
+        val = val*1000000;
+    } else if (val.includes("thousand")) {
+        val = val.replaceAll(" thousand", "").replace("$", "").replace(",", "");
+        val = +val;
+        val = val*1000;
+    }
+    return val;
+}
+
 async function russel2KScraper() {
     const browser = await puppeteer.launch( {headless:false} );
     const page =  await browser.newPage();
@@ -73,11 +102,11 @@ async function printRussell2K() {
 async function betterSite() {
     const browser = await puppeteer.launch( {headless:false} );
     const page = await browser.newPage();
-    await page.goto('https://www.ishares.com/us/products/239710/ishares-russell-2000-etf');
+    await page.goto('https://www.ishares.com/us/products/239714/ishares-russell-3000-etf'); // old line('https://www.ishares.com/us/products/239710/ishares-russell-2000-etf');
     await delay(5000);
 
     // Accept the cookies
-    const [cookies] = await page.$x('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');
+    const [cookies] = await page.$x('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');  // Old COokies('/html/body/div[2]/div[2]/div/div/div[2]/div/div/button[2]');
     await delay(500);
     
     await cookies.click();
@@ -85,7 +114,7 @@ async function betterSite() {
     await delay(500);
 
     // click show more
-    const [loadMore] = await page.$x('/html/body/div[1]/div[2]/div/div/div/div/div/div[13]/div/div/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[3]/a');
+    const [loadMore] = await page.$x('/html/body/div[1]/div[2]/div/div/div/div/div/div[13]/div/div/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[3]/a');    // old tag ('/html/body/div[1]/div[2]/div/div/div/div/div/div[13]/div/div/div/div[1]/div[1]/div[1]/div[2]/div[2]/div[3]/a');
     await loadMore.click();
     await delay(1000);
 
@@ -110,7 +139,7 @@ async function betterSite() {
                     companyname: cols[1],
                     sector: cols[2],
                     assetclass: cols[3],
-                    shareprice: ((+cols[4].replaceAll("$", "").replaceAll(",",""))/(+cols[7].replaceAll(',', ''))).toFixed(2),//cols[4]/cols[7], // This is giving null right now
+                    shareprice: +(((+cols[4].replaceAll("$", "").replaceAll(",",""))/(+cols[7].replaceAll(',', ''))).toFixed(2)),//cols[4]/cols[7], // This is giving null right now
                     marketvalue: cols[4],
                     weight: cols[5],
                     notionalvalue: cols[6],
@@ -162,10 +191,14 @@ async function writeMarketBeatToFile() {
 }
 
 async function combineData() {
-    const mb = await russel2KScraper();
     const ish = await betterSite();
-
+    const mb = await russel2KScraper();
     let temp = [];
+
+
+    ///// if statement for current price. If marketbeat exists use currentPrice, else use calculated price
+    ///// remove cuspid, isin, sedol
+
 
     ish.forEach(is => {
         let flag = false;
@@ -177,20 +210,16 @@ async function combineData() {
                         companyname: is.companyname,
                         sector: is.sector,
                         assetclass: is.assetclass,
-                        currentprice: mb[i].currentprice,
-                        pricePercentChange: mb[i].percentChange,
-                        marketvalue: is.marketvalue,
-                        marketcap: mb[i].MarketCap,
-                        PEratio: mb[i].PERatio,
-                        volume: mb[i].Volume,
-                        avgvolume: mb[i].AvgVolume,
-                        weight: is.weight,
-                        notionalvalue: is.notionalvalue,
-                        shares: is.shares,
-                        calculatedPrice: is.shareprice,
-                        cuspid: is.cuspid,
-                        isin: is.isin,
-                        sedol: is.sedol,
+                        currentprice: removeNonNumerals(mb[i].currentprice),
+                        pricePercentChange: convertPercents(mb[i].percentChange),
+                        marketvalue: removeNonNumerals(is.marketvalue),
+                        marketcap: convertToNumber(mb[i].MarketCap),
+                        PEratio: (mb[i].PERatio == "N/A") ? 0.00 : removeNonNumerals(mb[i].PERatio),
+                        volume: convertToNumber(mb[i].Volume),
+                        avgvolume: convertToNumber(mb[i].AvgVolume),
+                        weight: removeNonNumerals(is.weight),
+                        notionalvalue: removeNonNumerals(is.notionalvalue),
+                        shares: removeNonNumerals(is.shares),
                         datescraped: is.dateScraped
                         
                     }
@@ -203,20 +232,11 @@ async function combineData() {
                         companyname: is.companyname,
                         sector: is.sector,
                         assetclass: is.assetclass,
-                        currentprice: "-",
-                        pricePercentChange: "-",
-                        marketvalue: is.marketvalue,
-                        marketcap: "-",
-                        PEratio: "-",
-                        volume: "-",
-                        avgvolume: "-",
-                        weight: is.weight,
-                        notionalvalue: is.notionalvalue,
-                        shares: is.shares,
-                        calculatedPrice: is.shareprice,
-                        cuspid: is.cuspid,
-                        isin: is.isin,
-                        sedol: is.sedol,
+                        currentprice: +is.shareprice,
+                        marketvalue: removeNonNumerals(is.marketvalue),
+                        weight: removeNonNumerals(is.weight),
+                        notionalvalue: removeNonNumerals(is.notionalvalue),
+                        shares: removeNonNumerals(is.shares),
                         datescraped: is.dateScraped
                     }
                 )
@@ -246,9 +266,12 @@ async function writeComboDataToFile() {
 
 }
 
-printRussell2K();
+
+//printRussell2K();
 //printBetterStocks();
 //writeIsharesToFile();
 //writeMarketBeatToFile();
-//printDataCombo();
-//writeComboDataToFile();
+
+//printDataCombo(); // prints the data
+
+//writeComboDataToFile(); // Scrapes stock data and writes to file

@@ -8,6 +8,13 @@
 # testing
 /coverage
 
+GetInFB.js
+
+# 2023q2
+*.txt
+*.htm
+*.xlsx
+
 # production
 /build
 
