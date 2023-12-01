@@ -1,4 +1,4 @@
-const options = require("./data/options.json");
+const options = require("./options.json");
 
 /*
     You need to download the options.json from the shared google drive folder
@@ -120,6 +120,22 @@ function calculate(option) {
     }
 }
 
+function detectChange(points) {
+    let flags = [];
+    var consistent; // similar consecutives = true; diff consecutives = false;
+    for (let i = 0; i < points.length - 1; i++){
+        if (points[i] !== points[i+1]) {
+            consistent = false;
+            flags.push(i);
+        }
+        else {
+            consistent = true;
+        }
+    } 
+    //console.log("detect change");
+    return flags;
+}
+
 function main() {
 
     options.forEach(opt => {
@@ -127,9 +143,14 @@ function main() {
         opt.x_point = res.x;
         opt.long = res.long;
         opt.short = res.short;
+        let lc = detectChange(res.long);
+        let sc = detectChange(res.short);
+        console.log(opt);
+        console.log(lc);
+        console.log(sc);
     })
 
-    console.log(options[20]);
+    
     return options;
 }
 
