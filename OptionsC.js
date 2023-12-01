@@ -1,7 +1,7 @@
 const options = require("./data/options.json");
 
 /*
-    You need to download the stocks.json and options.json from the shared google drive folder
+    You need to download the options.json from the shared google drive folder
     and adjust the imported file paths accordingly
  */
 
