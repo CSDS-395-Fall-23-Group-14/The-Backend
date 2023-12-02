@@ -121,19 +121,22 @@ function calculate(option) {
 }
 
 function detectChange(points) {
-    let flags = [];
-    var consistent; // similar consecutives = true; diff consecutives = false;
-    for (let i = 0; i < points.length - 1; i++){
-        if (points[i] !== points[i+1]) {
+    // set initial state of consistent
+    // similar consecutives = true; diff consecutives = false;
+    let consistent = (points[0] === points[1]); 
+    for (let i = 1; i < points.length - 1; i++){
+        if (consistent && points[i] !== points[i+1]) {
             consistent = false;
-            flags.push(i);
+            return i;
         }
-        else {
+        else if (!consistent && points[i] === points[i+1]){
             consistent = true;
+            return i;
         }
     } 
-    //console.log("detect change");
-    return flags;
+
+    // no change found
+    return -1;
 }
 
 function main() {
