@@ -1,8 +1,7 @@
 const options = require("./data/options.json");
-<<<<<<< Updated upstream
-=======
+
 const fs = require('fs')
->>>>>>> Stashed changes
+
 
 /*
     You need to download the options.json from the shared google drive folder
@@ -125,8 +124,6 @@ function calculate(option, otherStrike) {
     }
 }
 
-<<<<<<< Updated upstream
-=======
 function sortPoints(rows) {
 
     // Sorting
@@ -581,7 +578,6 @@ function strapSpread(opt) {
       })
 }
 
->>>>>>> Stashed changes
 function main() {
 
     options.forEach(opt => {
@@ -591,9 +587,6 @@ function main() {
         opt.short = res.short;
     })
 
-<<<<<<< Updated upstream
-    console.log(options[20]);
-=======
 
     options.forEach((opt) => {
 
@@ -747,8 +740,6 @@ function main() {
             console.log("Successfully written to /data/test.json");
         }
     })
-
->>>>>>> Stashed changes
     return options;
 }
 
